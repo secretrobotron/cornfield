@@ -1,0 +1,24 @@
+{
+  "name": "cornfield",
+  "version": "0.0.1",
+  "author": "Popcorn Team <web-made-movies-working@googlegroups.com>",
+  "description": "The server companion to Popcorn Maker",
+  "contributors": [
+    {
+      "name": "Jon Buckley",
+      "email": "jon@jbuckley.ca"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jbuck/cornfield.git"
+  },
+  "dependencies": {
+    "express": "*",
+    "express-browserid": "*"
+  },
+  "license": "MIT",
+  "engine": {
+    "node": ">=0.6"
+  }
+}
