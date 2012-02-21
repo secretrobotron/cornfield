@@ -20,9 +20,10 @@ app.use(express.logger({ format: 'dev' }))
   // Allow everything to be used with CORS.
   // This should probably just be limited to badges
   .use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Origin", req.header('Origin'));
+    res.header("Access-Control-Allow-Credentials", "true");
     next();
-  });;
+  });
 
 require('express-browserid').plugAll(app);
 
@@ -80,7 +81,7 @@ app.post('/file/:name', function(req, res) {
   res.json({ error: 'okay' });
 });
 
-app.listen(1234, '127.0.0.1', function() {
+app.listen(1234, '0.0.0.0', function() {
   var addy = app.address();
   console.log('Server started on http://' + addy.address + ':' + addy.port);
 });
