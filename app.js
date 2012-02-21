@@ -1,53 +1,51 @@
 const express = require('express'),
-      path = require('path'),
-      app = express.createServer(),
-      poorDB = {};
-
-poorDB['jon@jbuckley.ca'] = {
-  'Template 1': {
-    'popcorn': 1
-  },
-  'Template 2': {
-    'herpderp': 2
-  }
-}
+      fs = require('fs'),
+      app = express.createServer();
 
 app.use(express.logger({ format: 'dev' }))
-  .use(express.static(path.join(__dirname, '.')))
   .use(express.bodyParser())
   .use(express.cookieParser())
   .use(express.session({ secret: "sekrits" }))
   // Allow everything to be used with CORS.
-  // This should probably just be limited to badges
+  // This should be limited somehow...
   .use(function(req, res, next) {
     res.header("Access-Control-Allow-Origin", req.header('Origin'));
     res.header("Access-Control-Allow-Credentials", "true");
+    res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT");
     next();
   });
 
 require('express-browserid').plugAll(app);
 
-app.get('/whoami', function(req, res) {
-  res.json({email: req.session.email});
-});
-
 app.get('/files', function(req, res) {
-  var email = req.session.email,
-      files = [];
+  var email = req.session.email;
 
   if (!email) {
     res.json({ error: 'unauthorized' }, 403);
     return;
   }
 
-  if (poorDB[email]) {
-    files = Object.keys(poorDB[email]);
-  }
+  fs.readdir('./files/' + email, function(err, files) {
+    if (!err) {
+      res.json({ error: 'okay', filenames: files });
+      return;
+    }
 
-  res.json({ error: 'okay', filenames: files });
+    res.json({ error: 'okay', filenames: [] });
+
+    fs.mkdir('./files/' + email, function(err) {
+      if (err) {
+        fs.mkdir('./files/', function(err) {
+          if (err) {
+            console.error('Something went horribly wrong!', err);
+          }
+        });
+      }
+    });
+  });
 });
 
-app.get('/file/:name', function(req, res) {
+app.get('/files/:name', function(req, res) {
   var email = req.session.email,
       name = req.params.name;
 
@@ -56,15 +54,15 @@ app.get('/file/:name', function(req, res) {
     return;
   }
 
-  if (!poorDB[email] || !poorDB[email][name]) {
-    res.json({ error: 'file not found' }, 404);
-    return;
-  }
-
-  res.json({ error: 'okay', data: poorDB[email][name] });
+  res.sendfile('./files/' + email + '/' + name, function(err) {
+    if (err) {
+      res.json({ error: 'file not found' }, 404);
+      next(err);
+    }
+  });
 });
 
-app.post('/file/:name', function(req, res) {
+app.put('/files/:name', function(req, res) {
   var email = req.session.email,
       name = req.params.name;
   
@@ -73,12 +71,15 @@ app.post('/file/:name', function(req, res) {
     return;
   }
 
-  if (!poorDB[email]) {
-    poorDB[email] = {};
-  }
+  fs.writeFile('./files/' + email + '/' + name, req.body.data, function(err) {
+    if (err) {
+      console.error('Something went horribly wrong!', err);
+      res.json({ error: err });
+      return;
+    }
 
-  poorDB[email][name] = req.body;
-  res.json({ error: 'okay' });
+    res.json({ error: 'okay' });
+  });
 });
 
 app.listen(1234, '0.0.0.0', function() {
