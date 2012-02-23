@@ -1,11 +1,13 @@
 const express = require('express'),
       fs = require('fs'),
-      app = express.createServer();
+      app = express.createServer(),
+      CONFIG = require('config'),
+      storage = CONFIG.server.storageDirectory;
 
-app.use(express.logger({ format: 'dev' }))
+app.use(express.logger(CONFIG.logger))
   .use(express.bodyParser())
   .use(express.cookieParser())
-  .use(express.session({ secret: "sekrits" }))
+  .use(express.session(CONFIG.session))
   // Allow everything to be used with CORS.
   // This should be limited somehow...
   .use(function(req, res, next) {
@@ -25,7 +27,7 @@ app.get('/files', function(req, res) {
     return;
   }
 
-  fs.readdir('./files/' + email, function(err, files) {
+  fs.readdir(storage + email, function(err, files) {
     if (!err) {
       res.json({ error: 'okay', filenames: files });
       return;
@@ -33,9 +35,9 @@ app.get('/files', function(req, res) {
 
     res.json({ error: 'okay', filenames: [] });
 
-    fs.mkdir('./files/' + email, function(err) {
+    fs.mkdir(storage + email, function(err) {
       if (err) {
-        fs.mkdir('./files/', function(err) {
+        fs.mkdir(storage, function(err) {
           if (err) {
             console.error('Something went horribly wrong!', err);
           }
@@ -54,7 +56,7 @@ app.get('/files/:name', function(req, res) {
     return;
   }
 
-  res.sendfile('./files/' + email + '/' + name, function(err) {
+  res.sendfile(storage + email + '/' + name, function(err) {
     if (err) {
       res.json({ error: 'file not found' }, 404);
       next(err);
@@ -71,7 +73,7 @@ app.put('/files/:name', function(req, res) {
     return;
   }
 
-  fs.writeFile('./files/' + email + '/' + name, req.body.data, function(err) {
+  fs.writeFile(storage + email + '/' + name, req.body.data, function(err) {
     if (err) {
       console.error('Something went horribly wrong!', err);
       res.json({ error: err });
@@ -82,7 +84,7 @@ app.put('/files/:name', function(req, res) {
   });
 });
 
-app.listen(1234, '0.0.0.0', function() {
+app.listen(CONFIG.server.bindPort, CONFIG.server.bindIP, function() {
   var addy = app.address();
   console.log('Server started on http://' + addy.address + ':' + addy.port);
 });

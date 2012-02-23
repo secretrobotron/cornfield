@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "express": "*",
-    "express-browserid": "*"
+    "express-browserid": "*",
+    "config": "*"
   },
   "license": "MIT",
   "engine": {
