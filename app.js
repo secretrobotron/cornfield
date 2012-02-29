@@ -59,7 +59,6 @@ app.get('/files/:name', function(req, res) {
   res.sendfile(storage + email + '/' + name, function(err) {
     if (err) {
       res.json({ error: 'file not found' }, 404);
-      next(err);
     }
   });
 });
