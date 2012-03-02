@@ -1,6 +1,11 @@
 cornfield - We Grow Popcorn
 ===========================
 
+Prerequisites
+-------------
+* node v0.6.11 or higher
+* npm
+
 Installation
 ------------
 1. `git clone https://github.com/jbuck/cornfield.git`
