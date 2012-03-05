@@ -2,7 +2,8 @@
   "server" : {
     "bindIP" : "127.0.0.1",
     "bindPort" : "8888",
-    "storageDirectory" : "./files/"
+    "storageDirectory" : "./files/",
+    "crossorigin" : "http://localhost"
   },
   "logger" : {
     "format" : "dev"

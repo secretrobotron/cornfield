@@ -2,16 +2,15 @@ const express = require('express'),
       fs = require('fs'),
       app = express.createServer(),
       CONFIG = require('config'),
-      storage = CONFIG.server.storageDirectory;
+      storage = CONFIG.server.storageDirectory,
+      crossorigin = CONFIG.server.crossorigin;
 
 app.use(express.logger(CONFIG.logger))
   .use(express.bodyParser())
   .use(express.cookieParser())
   .use(express.session(CONFIG.session))
-  // Allow everything to be used with CORS.
-  // This should be limited somehow...
   .use(function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", req.header('Origin'));
+    res.header("Access-Control-Allow-Origin", crossorigin);
     res.header("Access-Control-Allow-Credentials", "true");
     res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT");
     next();
